@@ -24,17 +24,9 @@ app.use(function (req, res, next) {
 });
 
 
-global.mongo = global.mongo || {};
-const initClientDbConnection = async () => {
-  if (!global.mongo.client) {
-    global.mongo.client = new MongoClient(`mongodb+srv://kulkarnidhirubhai:DhirubhaiKulkarni@cluster0.j3lktie.mongodb.net/?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
-  }
-  await global.mongo.client.connect();
-  return global.mongo.client;
-};
+const uri = 'mongodb+srv://kulkarnidhirubhai:DhirubhaiKulkarni@cluster0.j3lktie.mongodb.net/?retryWrites=true&w=majority';
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-
-global.clientConnection = initClientDbConnection();
 
 
 var server = require("http").createServer(app)
@@ -53,7 +45,7 @@ app.get("/", async (req, res) => {
 
 app.get("/getUserData/:page/:rowsPerPage", async (req, res) => {
   try {
-    const dbConnection = await global.clientConnection;
+    const dbConnection = await client.connect();
     const db = await dbConnection.db("CodingChallenge");
     const users = await db.collection("Users");
     const usersList = await users.find().skip(parseInt(req.params.page)).limit(parseInt(req.params.rowsPerPage)).toArray();
@@ -72,7 +64,7 @@ app.get("/getUserData/:page/:rowsPerPage", async (req, res) => {
 
 app.post("/addUser", async (req, res) => {
   try {
-    const dbConnection = await global.clientConnection;
+    const dbConnection = await client.connect();
     const db = await dbConnection.db("CodingChallenge");
     const users = await db.collection("Users");
     let newDocument = req.body;
@@ -87,7 +79,7 @@ app.post("/addUser", async (req, res) => {
 // Update the post with a new comment
 app.post("/ediUser/:id", async (req, res) => {
   try {
-    const dbConnection = await global.clientConnection;
+    const dbConnection = await client.connect();
     const db = await dbConnection.db("CodingChallenge");
     const users = await db.collection("Users");
     await users.updateOne({ _id: new ObjectID(req.params.id) },
@@ -110,7 +102,7 @@ app.post("/ediUser/:id", async (req, res) => {
 // Emit event when a task is fetched
 app.delete("/deleteUser/:id", async (req, res) => {
   try {
-    const dbConnection = await global.clientConnection;
+    const dbConnection = await client.connect();
     const db = await dbConnection.db("CodingChallenge");
     const users = await db.collection("Users");
     const result = await users.deleteOne({ _id: new ObjectID(req.params.id) })
