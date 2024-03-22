@@ -35,7 +35,7 @@ var server = require("http").createServer(app)
 
 app.get("/", async (req, res) => {
   try {
-
+    const dbConnection = await client.connect();
     res.status(200).send("Success");
   } catch (error) {
     res.status(500).send("Failed");
